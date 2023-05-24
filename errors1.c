@@ -1,62 +1,35 @@
 #include "shell.h"
 
 /**
- * _erratoi - converts a string to an integer
- * @s: the string to be converted
- * Return: 0 if no numbers in string, converted number otherwise
- *       -1 on error
- */
-int _erratoi(char *s)
-{
-	int i = 0;
-	unsigned long int result = 0;
-
-	if (*s == '+')
-		s++;  /* TODO: why does this make main return 255? */
-	for (i = 0;  s[i] != '\0'; i++)
-	{
-		if (s[i] >= '0' && s[i] <= '9')
-		{
-			result *= 10;
-			result += (s[i] - '0');
-			if (result > INT_MAX)
-				return (-1);
-		}
-		else
-			return (-1);
-	}
-	return (result);
-}
-
-/**
- * print_error - prints an error message
- * @info: the parameter & return info struct
+ * print_error - prints error message
+ * @data: Parameter & return data struct
  * @estr: string containing specified error type
- * Return: 0 if no numbers in string, converted number otherwise
- *        -1 on error
+ *
+ * Return: Returns 0 if no numbers in string, converted number otherwise
+ *        returns -1 on error
  */
-void print_error(data_shell *info, char *estr)
+void print_error(data_shell *data, char *estr)
 {
-	e_puts(info->fname);
+	e_puts(data->fname);
 	e_puts(": ");
-	print_d(info->line_count, STDERR_FILENO);
+	print_d(data->line_count, STDERR_FILENO);
 	e_puts(": ");
-	e_puts(info->argv[0]);
+	e_puts(data->argv[0]);
 	e_puts(": ");
 	e_puts(estr);
 }
 
 /**
- * print_d - function prints a decimal (integer) number (base 10)
+ * print_d - function prints a decimal number
  * @input: the input
- * @fd: the filedescriptor to write to
+ * @fd: Filedescriptor to write to
  *
- * Return: number of characters printed
+ * Return: Returns number of characters printed
  */
 int print_d(int input, int fd)
 {
+	int j, count = 0;
 	int (*__putchar)(char) = _putchar;
-	int i, count = 0;
 	unsigned int _abs_, current;
 
 	if (fd == STDERR_FILENO)
@@ -70,14 +43,14 @@ int print_d(int input, int fd)
 	else
 		_abs_ = input;
 	current = _abs_;
-	for (i = 1000000000; i > 1; i /= 10)
+	for (j = 1000000000; j > 1; j /= 10)
 	{
-		if (_abs_ / i)
+		if (_abs_ / j)
 		{
-			__putchar('0' + current / i);
+			__putchar('0' + current / j);
 			count++;
 		}
-		current %= i;
+		current %= j;
 	}
 	__putchar('0' + current);
 	count++;
@@ -85,33 +58,51 @@ int print_d(int input, int fd)
 	return (count);
 }
 
+
 /**
- * convert_number - converter function, a clone of itoa
+ * remove_comments - function replaces first instance of '#' with '\0'
+ * @buff: address of the string to modify
+ *
+ * Return: Always 0;
+ */
+void remove_comments(char *buff)
+{
+	int j;
+
+	for (j = 0; buff[j] != '\0'; j++)
+		if (buff[j] == '#' && (!j || buff[j - 1] == ' '))
+		{
+			buff[j] = '\0';
+			break;
+		}
+}
+
+/**
+ * convert_number - converter function, clone of itoa
  * @num: number
  * @base: base
  * @flags: argument flags
  *
- * Return: string
+ * Return: Returns string
  */
 char *convert_number(long int num, int base, int flags)
 {
-	static char *array;
-	static char buffer[50];
 	char sign = 0;
-	char *ptr;
+	static char buffer[50];
+	static char *array;
 	unsigned long n = num;
+	char *ptr;
 
 	if (!(flags & CONVERT_UNSIGNED) && num < 0)
 	{
 		n = -num;
 		sign = '-';
-
 	}
 	array = flags & CONVERT_LOWERCASE ? "0123456789abcdef" : "0123456789ABCDEF";
 	ptr = &buffer[49];
 	*ptr = '\0';
 
-	do	{
+	do {
 		*--ptr = array[n % base];
 		n /= base;
 	} while (n != 0);
@@ -122,19 +113,30 @@ char *convert_number(long int num, int base, int flags)
 }
 
 /**
- * remove_comments - function replaces first instance of '#' with '\0'
- * @buf: address of the string to modify
+ * _erratoi - converts string to integer
+ * @str: string to be converted
  *
- * Return: Always 0;
+ * Return: Returns 0 if no numbers in string, returns converted number
+ *       returns -1 on error
  */
-void remove_comments(char *buf)
+int _erratoi(char *str)
 {
-	int i;
+	unsigned long int result = 0;
+	int j = 0;
 
-	for (i = 0; buf[i] != '\0'; i++)
-		if (buf[i] == '#' && (!i || buf[i - 1] == ' '))
+	if (*str == '+')
+		str++; /* TODO: why does this make main return 255? */
+	for (j = 0; str[j] != '\0'; j++)
+	{
+		if (str[j] >= '0' && str[j] <= '9')
 		{
-			buf[i] = '\0';
-			break;
+			result *= 10;
+			result += (str[j] - '0');
+			if (result > INT_MAX)
+				return (-1);
 		}
+		else
+			return (-1);
+	}
+	return (result);
 }
