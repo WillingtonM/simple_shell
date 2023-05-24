@@ -31,7 +31,7 @@ void set_data(data_shell *data, char **avect)
 			data->argv = malloc(sizeof(char *) * 2);
 			if (data->argv)
 			{
-				data->argv[0] = _strdup(data->arg);
+				data->argv[0] = _strduplc(data->arg);
 				data->argv[1] = NULL;
 			}
 		}

@@ -26,11 +26,11 @@ int write_history(data_shell *data)
 
 	for (node = data->history; node; node = node->next)
 	{
-		_putsfd(node->str, fd_o);
-		_putfd('\n', fd_o);
+		puts_fd(node->str, fd_o);
+		put_fd('\n', fd_o);
 	}
 
-	_putfd(BUFFER_FLUSH, fd_o);
+	put_fd(BUFFER_FLUSH, fd_o);
 	close(fd_o);
 
 	return (1);
@@ -50,7 +50,7 @@ int build_history_list(data_shell *data, char *buff, int linecount)
 
 	if (data->history)
 		node = data->history;
-	__add_node_end(&node, buff, linecount);
+	_add_node_end(&node, buff, linecount);
 
 	if (!data->history)
 		data->history = node;
@@ -138,7 +138,7 @@ char *get_history_file(data_shell *data)
 {
 	char *dir, *buff;
 
-	dir = _getenv(data, "HOME=");
+	dir = get_env(data, "HOME=");
 	buff = malloc(sizeof(char) * (_strlen(dir) + _strlen(HIST_FILE) + 2));
 	if (!dir)
 		return (NULL);

@@ -70,7 +70,7 @@ int _setenv(data_shell *data, char *var, char *value)
 		node = node->next;
 	}
 
-	__add_node_end(&(data->env), buf, 0);
+	_add_node_end(&(data->env), buf, 0);
 
 	free(buf);
 	data->env_changed = 1;

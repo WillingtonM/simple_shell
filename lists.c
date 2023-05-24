@@ -1,14 +1,14 @@
 #include "shell.h"
 
 /**
- * __add_node_end - adds node to end of list
+ * _add_node_end - adds node to end of list
  * @head: address of pointer to head node
  * @str: str field of node
  * @numb: node index used by history
  *
  * Return: Returns size list
  */
-list_t *__add_node_end(list_t **head, const char *str, int numb)
+list_t *_add_node_end(list_t **head, const char *str, int numb)
 {
 	list_t *new_node, *node;
 
@@ -26,7 +26,7 @@ list_t *__add_node_end(list_t **head, const char *str, int numb)
 
 	if (str)
 	{
-		new_node->str = _strdup(str);
+		new_node->str = _strduplc(str);
 		if (!new_node->str)
 		{
 			free(new_node);
@@ -71,7 +71,7 @@ list_t *_add_node(list_t **head, const char *str, int numb)
 
 	if (str)
 	{
-		new_head->str = _strdup(str);
+		new_head->str = _strduplc(str);
 		if (!new_head->str)
 		{
 			free(new_head);
