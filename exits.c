@@ -21,7 +21,8 @@ char *_strchr(char *str, char chr)
  * *_strncat - concatenates two strings
  * @dest: first string
  * @src: Second string
- * @n: Byte count to be maximally used
+ * @n_cnt: Byte count to be maximally used
+ *
  * Return: Returns concatenated string
  */
 char *_strncat(char *dest, char *src, int n_cnt)

@@ -72,7 +72,7 @@ int _isalpha(int chr)
  *
  * Return: returns 1 if mode is interactive, otherwise return 0
  */
-int interactive(data_shell *info)
+int interactive(data_shell *data)
 {
-	return (isatty(STDIN_FILENO) && info->readfd <= 2);
+	return (isatty(STDIN_FILENO) && data->readfd <= 2);
 }
