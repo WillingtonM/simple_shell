@@ -1,13 +1,53 @@
 #include "shell.h"
 
 /**
- * find_builtin - finds a builtin command
- * @data: the parameter & return data struct
+ * find_cmd - finds command in PATH
+ * @data: Data struct
  *
- * Return: -1 if builtin not found,
- *			0 if builtin executed successfully,
- *			1 if builtin found but not successful,
- *			-2 if builtin signals exit()
+ * Return: Returns void
+ */
+void find_cmd(data_shell *data)
+{
+	int i, k;
+	char *path = NULL;
+
+	data->path = data->argv[0];
+	if (data->linecount_flag == 1)
+	{
+		data->line_count++;
+		data->linecount_flag = 0;
+	}
+
+	for (i = 0, k = 0; data->arg[i]; i++)
+		if (!is_delimeter(data->arg[i], " \t\n"))
+			k++;
+	if (!k)
+		return;
+
+	path = find_path(data, get_env(data, "PATH="), data->argv[0]);
+	if (path)
+	{
+		data->path = path;
+		fork_cmd(data);
+	}
+	else
+	{
+		if ((interactive(data) || get_env(data, "PATH=") ||
+			data->argv[0][0] == '/') && is_cmd(data, data->argv[0]))
+			fork_cmd(data);
+		else if (*(data->arg) != '\n')
+		{
+			data->status = 127;
+			print_error(data, "not found\n");
+		}
+	}
+}
+
+/**
+ * find_builtin - finds builtin command
+ * @data: Data struct
+ *
+ * Return: Returns -1 if builtin not found,
  */
 int find_builtin(data_shell *data)
 {
@@ -35,65 +75,23 @@ int find_builtin(data_shell *data)
 }
 
 /**
- * find_cmd - finds a command in PATH
- * @data: the parameter & return data struct
- *
- * Return: void
- */
-void find_cmd(data_shell *data)
-{
-	char *path = NULL;
-	int i, k;
-
-	data->path = data->argv[0];
-	if (data->linecount_flag == 1)
-	{
-		data->line_count++;
-		data->linecount_flag = 0;
-	}
-	for (i = 0, k = 0; data->arg[i]; i++)
-		if (!is_delimeter(data->arg[i], " \t\n"))
-			k++;
-	if (!k)
-		return;
-
-	path = find_path(data, get_env(data, "PATH="), data->argv[0]);
-	if (path)
-	{
-		data->path = path;
-		fork_cmd(data);
-	}
-	else
-	{
-		if ((interactive(data) || get_env(data, "PATH=")
-			|| data->argv[0][0] == '/') && is_cmd(data, data->argv[0]))
-			fork_cmd(data);
-		else if (*(data->arg) != '\n')
-		{
-			data->status = 127;
-			print_error(data, "not found\n");
-		}
-	}
-}
-
-/**
  * fork_cmd - forks a exec thread to run cmd
- * @data: Parameter & return data struct
+ * @data: Data struct
  *
- * Return: void
+ * Return: returns void
  */
 void fork_cmd(data_shell *data)
 {
-	pid_t child_pid;
+	pid_t chld_pid;
 
-	child_pid = fork();
-	if (child_pid == -1)
+	chld_pid = fork();
+	if (chld_pid == -1)
 	{
 		perror("Error:");
 		return;
 	}
 
-	if (child_pid == 0)
+	if (chld_pid == 0)
 	{
 		if (execve(data->path, data->argv, get_environ(data)) == -1)
 		{
@@ -117,28 +115,28 @@ void fork_cmd(data_shell *data)
 
 /**
  * hsh - main shell loop
- * @data: the parameter & return data struct
- * @av: the argument vector from main()
+ * @data: Data struct
+ * @avect: the argument vector from main()
  *
- * Return: 0 on success, 1 on error, or error code
+ * Return: Returns 0 on success, returns  1 if error, or the error code
  */
-int hsh(data_shell *data, char **av)
+int hsh(data_shell *data, char **avect)
 {
-	ssize_t r = 0;
-	int builtin_ret = 0;
+	int builtin_return = 0;
+	ssize_t ro = 0;
 
-	while (r != -1 && builtin_ret != -2)
+	while (ro != -1 && builtin_return != -2)
 	{
 		clear_data(data);
 		if (interactive(data))
 			_puts("$ ");
 		e_putchar(BUFFER_FLUSH);
-		r = get_input(data);
-		if (r != -1)
+		ro = get_input(data);
+		if (ro != -1)
 		{
-			set_data(data, av);
-			builtin_ret = find_builtin(data);
-			if (builtin_ret == -1)
+			set_data(data, avect);
+			builtin_return = find_builtin(data);
+			if (builtin_return == -1)
 				find_cmd(data);
 		}
 		else if (interactive(data))
@@ -149,11 +147,12 @@ int hsh(data_shell *data, char **av)
 	free_data(data, 1);
 	if (!interactive(data) && data->status)
 		exit(data->status);
-	if (builtin_ret == -2)
+	if (builtin_return == -2)
 	{
 		if (data->err_num == -1)
 			exit(data->status);
 		exit(data->err_num);
 	}
-	return (builtin_ret);
+
+	return (builtin_return);
 }
